@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"io"
 	"strconv"
+	"strings"
 )
 
 const NoExpire = 0
@@ -23,6 +24,16 @@ func NewProtocolDecoder(writer io.Writer) *protocol {
 	return &protocol{
 		Writer: bufio.NewWriter(writer),
 	}
+}
+
+func (p *protocol) floatToString(value float64) string {
+	converted := strconv.FormatFloat(value, 'f', 10, 64)
+
+	// Drop trailing zeros and . if needed
+	return strings.TrimRight(
+		strings.TrimRight(converted, "0"),
+		".",
+	)
 }
 
 func (p *protocol) writeCommand(args ...string) (err error) {
@@ -107,7 +118,7 @@ func (p *protocol) StartZSet(key []byte, cardinality, expire int64) {
 	p.preExpire(expire)
 }
 func (p *protocol) Zadd(key []byte, score float64, member []byte) {
-	p.writeCommand("ZADD", string(key), strconv.FormatFloat(score, 'f', 6, 64), string(member))
+	p.writeCommand("ZADD", string(key), p.floatToString(score), string(member))
 }
 func (p *protocol) EndZSet(key []byte) {
 	p.postExpire(string(key))

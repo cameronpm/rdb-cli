@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-// StartDatabase
+// Database selection
 var selecttests = []struct {
 	db       int
 	expected string
@@ -15,7 +15,7 @@ var selecttests = []struct {
 	{435, "*2\r\n$6\r\nSELECT\r\n$3\r\n435\r\n"},
 }
 
-func TestStartDatabase(t *testing.T) {
+func TestDatabaseSelect(t *testing.T) {
 	var buf bytes.Buffer
 	d := NewProtocolDecoder(&buf)
 
@@ -29,7 +29,7 @@ func TestStartDatabase(t *testing.T) {
 
 }
 
-// Set
+// Simple KV using Set
 var settests = []struct {
 	key      []byte
 	value    []byte
@@ -40,7 +40,7 @@ var settests = []struct {
 	{[]byte("pokemon"), []byte("pawel"), 0, "*3\r\n$3\r\nSET\r\n$7\r\npokemon\r\n$5\r\npawel\r\n"},
 }
 
-func TestSet(t *testing.T) {
+func TestSimpleKvSet(t *testing.T) {
 	var buf bytes.Buffer
 	d := NewProtocolDecoder(&buf)
 
@@ -53,7 +53,7 @@ func TestSet(t *testing.T) {
 	}
 }
 
-// HSet
+// Hash maps
 var hsettests = []struct {
 	key      []byte
 	field    []byte
@@ -66,7 +66,7 @@ var hsettests = []struct {
 	{[]byte("catch"), []byte("em"), []byte("all"), 0, "*4\r\n$4\r\nHSET\r\n$5\r\ncatch\r\n$2\r\nem\r\n$3\r\nall\r\n"},
 }
 
-func TestHSet(t *testing.T) {
+func TestHashMaps(t *testing.T) {
 	var buf bytes.Buffer
 	d := NewProtocolDecoder(&buf)
 
@@ -79,6 +79,96 @@ func TestHSet(t *testing.T) {
 
 		if buf.String() != tt.expected {
 			t.Errorf("Hset(%q, %q, %q, %d) => %q, want %q", tt.key, tt.field, tt.value, tt.expire, buf.String(), tt.expected)
+		}
+	}
+}
+
+// Sets
+var saddtests = []struct {
+	key      []byte
+	member   []byte
+	expire   int64
+	expected string
+}{
+	{[]byte("ala"), []byte("kot"), 908761, "*3\r\n$4\r\nSADD\r\n$3\r\nala\r\n$3\r\nkot\r\n*3\r\n$9\r\nPEXPIREAT\r\n$3\r\nala\r\n$6\r\n908761\r\n"},
+	{[]byte("ala"), []byte("pies"), 3451, "*3\r\n$4\r\nSADD\r\n$3\r\nala\r\n$4\r\npies\r\n*3\r\n$9\r\nPEXPIREAT\r\n$3\r\nala\r\n$4\r\n3451\r\n"},
+	{[]byte("pokemon"), []byte("pawel"), 0, "*3\r\n$4\r\nSADD\r\n$7\r\npokemon\r\n$5\r\npawel\r\n"},
+	{[]byte("pokemon"), []byte("pikachu"), 0, "*3\r\n$4\r\nSADD\r\n$7\r\npokemon\r\n$7\r\npikachu\r\n"},
+}
+
+func TestSets(t *testing.T) {
+	var buf bytes.Buffer
+	d := NewProtocolDecoder(&buf)
+
+	for _, tt := range saddtests {
+		buf.Reset()
+
+		d.StartSet(tt.key, 4, tt.expire)
+		d.Sadd(tt.key, tt.member)
+		d.EndHash(tt.key)
+
+		if buf.String() != tt.expected {
+			t.Errorf("Sadd(%q, %q) => %q, want %q", tt.key, tt.member, buf.String(), tt.expected)
+		}
+	}
+}
+
+// Lists
+var listtests = []struct {
+	key      []byte
+	value    []byte
+	expire   int64
+	expected string
+}{
+	{[]byte("ala"), []byte("kot"), 908761, "*3\r\n$5\r\nRPUSH\r\n$3\r\nala\r\n$3\r\nkot\r\n*3\r\n$9\r\nPEXPIREAT\r\n$3\r\nala\r\n$6\r\n908761\r\n"},
+	{[]byte("ala"), []byte("pies"), 3451, "*3\r\n$5\r\nRPUSH\r\n$3\r\nala\r\n$4\r\npies\r\n*3\r\n$9\r\nPEXPIREAT\r\n$3\r\nala\r\n$4\r\n3451\r\n"},
+	{[]byte("pokemon"), []byte("pawel"), 0, "*3\r\n$5\r\nRPUSH\r\n$7\r\npokemon\r\n$5\r\npawel\r\n"},
+	{[]byte("pokemon"), []byte("pikachu"), 0, "*3\r\n$5\r\nRPUSH\r\n$7\r\npokemon\r\n$7\r\npikachu\r\n"},
+}
+
+func TestLists(t *testing.T) {
+	var buf bytes.Buffer
+	d := NewProtocolDecoder(&buf)
+
+	for _, tt := range listtests {
+		buf.Reset()
+
+		d.StartList(tt.key, 1, tt.expire)
+		d.Rpush(tt.key, tt.value)
+		d.EndList(tt.key)
+
+		if buf.String() != tt.expected {
+			t.Errorf("Rpush(%q, %q) => %q, want %q", tt.key, tt.value, buf.String(), tt.expected)
+		}
+	}
+}
+
+// Sorted Sets
+var sortedsettests = []struct {
+	key      []byte
+	score    float64
+	member   []byte
+	expire   int64
+	expected string
+}{
+	{[]byte("ala"), 1.2, []byte("kot"), 123456, "*4\r\n$4\r\nZADD\r\n$3\r\nala\r\n$3\r\n1.2\r\n$3\r\nkot\r\n*3\r\n$9\r\nPEXPIREAT\r\n$3\r\nala\r\n$6\r\n123456\r\n"},
+	{[]byte("foo"), 2, []byte("barbaz"), 123456, "*4\r\n$4\r\nZADD\r\n$3\r\nfoo\r\n$1\r\n2\r\n$6\r\nbarbaz\r\n*3\r\n$9\r\nPEXPIREAT\r\n$3\r\nfoo\r\n$6\r\n123456\r\n"},
+	{[]byte("ala"), 2.34, []byte("kot"), 123456, "*4\r\n$4\r\nZADD\r\n$3\r\nala\r\n$4\r\n2.34\r\n$3\r\nkot\r\n*3\r\n$9\r\nPEXPIREAT\r\n$3\r\nala\r\n$6\r\n123456\r\n"},
+}
+
+func TestSortedSets(t *testing.T) {
+	var buf bytes.Buffer
+	d := NewProtocolDecoder(&buf)
+
+	for _, tt := range sortedsettests {
+		buf.Reset()
+
+		d.StartZSet(tt.key, 1, tt.expire)
+		d.Zadd(tt.key, tt.score, tt.member)
+		d.EndZSet(tt.key)
+
+		if buf.String() != tt.expected {
+			t.Errorf("Zadd(%q, %q, %q) => %q, want %q", tt.key, tt.score, tt.member, buf.String(), tt.expected)
 		}
 	}
 }
