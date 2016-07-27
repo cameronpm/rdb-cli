@@ -2,7 +2,6 @@ package decoder
 
 import (
 	"bufio"
-	"github.com/cupcake/rdb/nopdecoder"
 	"io"
 	"strconv"
 )
@@ -18,7 +17,6 @@ var (
 type protocol struct {
 	expire int64
 	*bufio.Writer
-	nopdecoder.NopDecoder
 }
 
 func NewProtocolDecoder(writer io.Writer) *protocol {

@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/brainly/rdb-tools/decoder"
+	"github.com/brainly/rdb-cli/decoder"
 	"github.com/cupcake/rdb"
 	"os"
 )
