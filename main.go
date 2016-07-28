@@ -8,6 +8,8 @@ import (
 	"os"
 )
 
+var Version = "0.1-dev"
+
 var formats = map[string]rdb.Decoder{
 	"protocol": decoder.NewProtocolDecoder(os.Stdout),
 	"diff":     &decoder.Diff{},
@@ -31,11 +33,21 @@ func availableFormats() []string {
 	return keys
 }
 
+func printVersion() {
+	fmt.Printf("rdb-cli v%s\n", Version)
+}
+
 func main() {
 	flag.Usage = Usage
+	version := flag.Bool("version", false, "Print version and exit")
 	format := flag.String("format", "protocol", "Output format")
 	rdbpath := flag.String("rdb", "", "Path to RDB file")
 	flag.Parse()
+
+	if *version {
+		printVersion()
+		os.Exit(0)
+	}
 
 	if len(*rdbpath) == 0 {
 		fmt.Printf("Missing RDB file path\n\n")
