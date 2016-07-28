@@ -168,7 +168,7 @@ func TestSortedSets(t *testing.T) {
 		d.EndZSet(tt.key)
 
 		if buf.String() != tt.expected {
-			t.Errorf("Zadd(%q, %q, %q) => %q, want %q", tt.key, tt.score, tt.member, buf.String(), tt.expected)
+			t.Errorf("Zadd(%q, %f, %q) => %q, want %q", tt.key, tt.score, tt.member, buf.String(), tt.expected)
 		}
 	}
 }
