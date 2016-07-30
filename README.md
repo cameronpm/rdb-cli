@@ -14,7 +14,7 @@ A primary use case:
 After you acquire an RDB snapshot, restoring it to a running instance is as simple as running one command:
 
 ```bash
-$ ./rdb-cli -format protocol -rdb ./redis-backup.rdb | redis-cli --pipe
+$ ./rdb-cli --format protocol ./redis-backup.rdb | redis-cli --pipe
 ```
 
 # Similar tools

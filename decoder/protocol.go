@@ -20,7 +20,7 @@ type protocol struct {
 	*bufio.Writer
 }
 
-func NewProtocolDecoder(writer io.Writer) *protocol {
+func Protocol(writer io.Writer) *protocol {
 	return &protocol{
 		Writer: bufio.NewWriter(writer),
 	}

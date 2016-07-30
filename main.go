@@ -1,76 +1,48 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"github.com/brainly/rdb-cli/decoder"
 	"github.com/cupcake/rdb"
+	"github.com/jessevdk/go-flags"
+	"log"
 	"os"
 )
 
 var Version = "0.1-dev"
 
 var formats = map[string]rdb.Decoder{
-	"protocol": decoder.NewProtocolDecoder(os.Stdout),
-	"diff":     &decoder.Diff{},
+	"protocol": decoder.Protocol(os.Stdout),
+	"diff":     decoder.Diff(),
 }
 
-var Usage = func() {
-	fmt.Fprintf(os.Stderr, "Usage: %s [parameters]\n", os.Args[0])
-	fmt.Fprintf(os.Stderr, "\nParameters:\n")
-	flag.PrintDefaults()
+type rdbOptions struct {
+	Path string `required:"1" positional-arg-name:"RDBPATH" description:"Path to RDB file"`
 }
 
-func availableFormats() []string {
-	keys := make([]string, len(formats))
-
-	i := 0
-	for key := range formats {
-		keys[i] = key
-		i++
-	}
-
-	return keys
-}
-
-func printVersion() {
-	fmt.Printf("rdb-cli v%s\n", Version)
+var options struct {
+	Version func()     `long:"version" description:"Print version and exit"`
+	Format  string     `long:"format" choice:"diff" choice:"protocol" description:"Output format of RDB file"`
+	Rdb     rdbOptions `positional-args:"1"`
 }
 
 func main() {
-	flag.Usage = Usage
-	version := flag.Bool("version", false, "Print version and exit")
-	format := flag.String("format", "protocol", "Output format")
-	rdbpath := flag.String("rdb", "", "Path to RDB file")
-	flag.Parse()
-
-	if *version {
-		printVersion()
+	options.Version = func() {
+		fmt.Printf("rdb-cli v%s\n", Version)
 		os.Exit(0)
 	}
 
-	if len(*rdbpath) == 0 {
-		fmt.Printf("Missing RDB file path\n\n")
-		flag.Usage()
+	if _, err := flags.Parse(&options); err != nil {
 		os.Exit(1)
 	}
 
-	decoder, ok := formats[*format]
-	if !ok {
-		fmt.Printf("Invalid -format %s; Available formats: %s\n\n", *format, availableFormats())
-		flag.Usage()
-		os.Exit(1)
-	}
-
-	file, err := os.Open(*rdbpath)
+	file, err := os.Open(options.Rdb.Path)
 	if err != nil {
-		fmt.Printf("Fatal: %s\n", err)
-		os.Exit(1)
+		log.Fatalf("Unable to open RDB file '%s': %s\n", options.Rdb.Path, err)
 	}
 
-	err = rdb.Decode(file, decoder)
+	err = rdb.Decode(file, formats[options.Format])
 	if err != nil {
-		fmt.Printf("Fatal: %s\n", err)
-		os.Exit(1)
+		log.Fatalf("Failed to decode RDB file '%s': %s\n", options.Rdb.Path, err)
 	}
 }
