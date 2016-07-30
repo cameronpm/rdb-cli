@@ -26,6 +26,18 @@ var options struct {
 	Rdb     rdbOptions `positional-args:"1"`
 }
 
+func format(rdbPath string, d rdb.Decoder) {
+	file, err := os.Open(rdbPath)
+	if err != nil {
+		log.Fatalf("Unable to open RDB file '%s': %s\n", options.Rdb.Path, err)
+	}
+
+	err = rdb.Decode(file, d)
+	if err != nil {
+		log.Fatalf("Failed to decode RDB file '%s': %s\n", options.Rdb.Path, err)
+	}
+}
+
 func main() {
 	options.Version = func() {
 		fmt.Printf("rdb-cli v%s\n", Version)
@@ -36,13 +48,5 @@ func main() {
 		os.Exit(1)
 	}
 
-	file, err := os.Open(options.Rdb.Path)
-	if err != nil {
-		log.Fatalf("Unable to open RDB file '%s': %s\n", options.Rdb.Path, err)
-	}
-
-	err = rdb.Decode(file, formats[options.Format])
-	if err != nil {
-		log.Fatalf("Failed to decode RDB file '%s': %s\n", options.Rdb.Path, err)
-	}
+	format(options.Rdb.Path, formats[options.Format])
 }

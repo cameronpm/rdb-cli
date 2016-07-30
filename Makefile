@@ -6,7 +6,7 @@ BINARY=rdb-cli
 .DEFAULT_GOAL: $(BINARY)
 
 $(BINARY): $(SOURCES)
-	go build -o ${BINARY} main.go
+	go build -o ${BINARY} rdb.go
 
 .PHONY: test
 test:
