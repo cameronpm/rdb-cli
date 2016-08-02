@@ -17,7 +17,7 @@ var selecttests = []struct {
 
 func TestDatabaseSelect(t *testing.T) {
 	var buf bytes.Buffer
-	d := NewProtocolDecoder(&buf)
+	d := Protocol(&buf)
 
 	for _, tt := range selecttests {
 		buf.Reset()
@@ -42,7 +42,7 @@ var settests = []struct {
 
 func TestSimpleKvSet(t *testing.T) {
 	var buf bytes.Buffer
-	d := NewProtocolDecoder(&buf)
+	d := Protocol(&buf)
 
 	for _, tt := range settests {
 		buf.Reset()
@@ -68,7 +68,7 @@ var hsettests = []struct {
 
 func TestHashMaps(t *testing.T) {
 	var buf bytes.Buffer
-	d := NewProtocolDecoder(&buf)
+	d := Protocol(&buf)
 
 	for _, tt := range hsettests {
 		buf.Reset()
@@ -98,7 +98,7 @@ var saddtests = []struct {
 
 func TestSets(t *testing.T) {
 	var buf bytes.Buffer
-	d := NewProtocolDecoder(&buf)
+	d := Protocol(&buf)
 
 	for _, tt := range saddtests {
 		buf.Reset()
@@ -128,7 +128,7 @@ var listtests = []struct {
 
 func TestLists(t *testing.T) {
 	var buf bytes.Buffer
-	d := NewProtocolDecoder(&buf)
+	d := Protocol(&buf)
 
 	for _, tt := range listtests {
 		buf.Reset()
@@ -158,7 +158,7 @@ var sortedsettests = []struct {
 
 func TestSortedSets(t *testing.T) {
 	var buf bytes.Buffer
-	d := NewProtocolDecoder(&buf)
+	d := Protocol(&buf)
 
 	for _, tt := range sortedsettests {
 		buf.Reset()
