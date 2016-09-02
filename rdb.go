@@ -9,7 +9,7 @@ import (
 	"os"
 )
 
-var Version = "0.1-dev"
+var Version = "0.2"
 
 var formats = map[string]rdb.Decoder{
 	"protocol": decoder.Protocol(os.Stdout),
