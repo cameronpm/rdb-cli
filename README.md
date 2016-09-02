@@ -24,7 +24,3 @@ Similar tools in different languages:
  - python: https://github.com/sripathikrishnan/redis-rdb-tools
  - node.js: https://github.com/codeaholics/node-rdb-tools
  - rust: https://github.com/badboy/rdb-rs
-
-All this tools works ok but they are slow! Restoring redis for PH market (75MB RDB dump) took about 1m 30s for python version, 50s for node.js version and about 35s for rust version (all tests were running on AWS m3.medium instance).
-
-This Go implementation is able to do it in about 15s. This shows big difference for relatively small dump.
