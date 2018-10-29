@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"crypto/md5"
 	"fmt"
-	"github.com/brainly/rdb-cli/decoder"
+	"github.com/cameronpm/rdb-cli/decoder"
 	"testing"
 )
 

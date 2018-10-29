@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/brainly/rdb-cli/decoder"
+	"github.com/cameronpm/rdb-cli/decoder"
 	"github.com/cupcake/rdb"
 	"github.com/jessevdk/go-flags"
 	"log"
@@ -14,6 +14,7 @@ var Version = "0.2"
 var formats = map[string]rdb.Decoder{
 	"protocol": decoder.Protocol(os.Stdout),
 	"diff":     decoder.Diff(),
+	"size":     decoder.Size(),
 }
 
 type rdbOptions struct {
@@ -22,7 +23,7 @@ type rdbOptions struct {
 
 var options struct {
 	Version func()     `long:"version" description:"Print version and exit"`
-	Format  string     `long:"format" choice:"diff" choice:"protocol" description:"Output format of RDB file"`
+	Format  string     `long:"format" choice:"diff" choice:"protocol" choice:"size" description:"Output format of RDB file"`
 	Rdb     rdbOptions `positional-args:"1"`
 }
 

@@ -5,6 +5,8 @@ import (
 	"io"
 	"strconv"
 	"strings"
+
+	"github.com/cupcake/rdb"
 )
 
 const NoExpire = 0
@@ -19,6 +21,8 @@ type protocol struct {
 	expire int64
 	*bufio.Writer
 }
+
+var _ rdb.Decoder = (*protocol)(nil)
 
 func Protocol(writer io.Writer) *protocol {
 	return &protocol{
@@ -73,6 +77,9 @@ func (p *protocol) StartDatabase(n int) {
 	p.writeCommand("SELECT", strconv.Itoa(n))
 }
 func (p *protocol) EndDatabase(n int) {}
+
+func (p *protocol) Aux(key, value []byte)                     {}
+func (p *protocol) ResizeDatabase(dbSize, expiresSize uint32) {}
 
 func (p *protocol) Set(key, value []byte, expire int64) {
 	p.preExpire(expire)
